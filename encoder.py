@@ -20,10 +20,9 @@ class EncoderLayer(tf.keras.layers.Layer):
     return x
 
 
-def conv_block(n_state = 512, kernel_size=3, activation = 'gelu', n_mels = 80):
-    input_shape = (None, n_mels)
+def conv_block(n_state = 512, kernel_size=3, activation = 'gelu'):
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size, activation=activation, padding = 'same', input_shape=input_shape),
+        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size, activation=activation, padding = 'same'),
         tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size,strides = 2, padding = 'same', activation=activation),
     ]
   )
@@ -55,7 +54,7 @@ class Encoder(tf.keras.layers.Layer):
     # `x` is token-IDs shape: (batch, n_mels, n_ctx)
     x = self.conv_layer(x)
 
-    x = tf.transpose(x, perm=[0, 2, 1])
+    # x = tf.transpose(x, perm=[0, 2, 1])
 
     x = self.pos_embedding(x)  # Shape `(batch_size, seq_len, d_model)`.
 

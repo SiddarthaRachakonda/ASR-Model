@@ -24,7 +24,7 @@ class PositionalEmbedding(tf.keras.layers.Layer):
     length = tf.shape(x)[1]
     x = self.embedding(x)
     # This factor sets the relative scale of the embedding and positonal_encoding.
-    x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
+    # x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
     x = x + self.pos_encoding[tf.newaxis, :length, :]
     return x
 
@@ -35,11 +35,8 @@ class EncoderPositionalEmbedding(tf.keras.layers.Layer):
     self.d_model = d_model
     self.pos_encoding = positional_encoding(length=2048, d_model=d_model)
 
-  def compute_mask(self, *args, **kwargs):
-    return self.embedding.compute_mask(*args, **kwargs)
-
   def call(self, x):
     length = tf.shape(x)[1]
-    x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
+    # x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
     x = x + self.pos_encoding[tf.newaxis, :length, :]
     return x
