@@ -1,7 +1,7 @@
 import tensorflow as tf
 from attention import GlobalSelfAttention
 from feedforward import FeedForward
-from positional_encoding import PositionalEmbedding
+from positional_encoding import EncoderPositionalEmbedding
 
 class EncoderLayer(tf.keras.layers.Layer):
   def __init__(self,*, d_model, num_heads, dff, dropout_rate=0.1):
@@ -20,11 +20,13 @@ class EncoderLayer(tf.keras.layers.Layer):
     return x
 
 
-def conv_block(filters = 64, kernel_size=3, activation = 'gelu', padding = 'same', input_shape = (None, 128)):
-    model = tf.keras.models.Sequential(
-                tf.keras.layers.Conv1D(filters=filters, kernel_size=kernel_size, activation=activation, padding=padding, input_shape=input_shape),
-                tf.keras.layers.Conv1D(filters=filters * 2, kernel_size=kernel_size, activation=activation, padding=padding),
-                tf.keras.layers.Dense(128)) # Modify to the required output shape
+def conv_block(n_state = 512, kernel_size=3, activation = 'gelu', n_mels = 80):
+    input_shape = (None, n_mels)
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size, activation=activation, padding = 'same', input_shape=input_shape),
+        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size,strides = 2, padding = 'same', activation=activation),
+    ]
+  )
     return model
 
 class Encoder(tf.keras.layers.Layer):
@@ -37,7 +39,7 @@ class Encoder(tf.keras.layers.Layer):
 
     self.conv_layer = conv_block()
 
-    self.pos_embedding = PositionalEmbedding(
+    self.pos_embedding = EncoderPositionalEmbedding(
         vocab_size=vocab_size, d_model=d_model)
 
     self.enc_layers = [
@@ -50,8 +52,10 @@ class Encoder(tf.keras.layers.Layer):
 
   def call(self, x):
 
-    # `x` is token-IDs shape: (batch, seq_len)
+    # `x` is token-IDs shape: (batch, n_mels, n_ctx)
     x = self.conv_layer(x)
+
+    x = tf.transpose(x, perm=[0, 2, 1])
 
     x = self.pos_embedding(x)  # Shape `(batch_size, seq_len, d_model)`.
 
