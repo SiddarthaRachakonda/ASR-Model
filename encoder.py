@@ -51,8 +51,6 @@ class Encoder(tf.keras.layers.Layer):
 
   def call(self, x):
 
-    # `x` is token-IDs shape: (batch, n_mels, n_ctx)
-    x = tf.transpose(x, perm=[0, 2, 1])
     # `x` is shape: (batch, n_ctx, n_mels)
     x = self.conv_layer(x)
 
