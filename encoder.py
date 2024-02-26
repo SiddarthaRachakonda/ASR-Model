@@ -22,24 +22,22 @@ class EncoderLayer(tf.keras.layers.Layer):
 
 def conv_block(n_state = 512, kernel_size=3, activation = 'gelu'):
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size, activation=activation, padding = 'same'),
+        tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size, activation=activation, padding = 'same', input = (None, 80)),
         tf.keras.layers.Conv1D(filters=n_state, kernel_size=kernel_size,strides = 2, padding = 'same', activation=activation),
     ]
   )
     return model
 
 class Encoder(tf.keras.layers.Layer):
-  def __init__(self, *, num_layers, d_model, num_heads,
-               dff, vocab_size, dropout_rate=0.1):
+  def __init__(self, *, num_layers, d_model, num_heads, dff, dropout_rate=0.1):
     super().__init__()
 
     self.d_model = d_model
     self.num_layers = num_layers
 
-    self.conv_layer = conv_block()
+    self.conv_layer = conv_block(n_state=d_model, kernel_size=3, activation = 'gelu')
 
-    self.pos_embedding = EncoderPositionalEmbedding(
-        vocab_size=vocab_size, d_model=d_model)
+    self.pos_embedding = EncoderPositionalEmbedding(d_model=d_model)
 
     self.enc_layers = [
         EncoderLayer(d_model=d_model,
